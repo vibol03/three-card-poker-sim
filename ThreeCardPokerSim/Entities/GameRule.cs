@@ -30,10 +30,10 @@ namespace ThreeCardPokerSim.Entities
 
 		public static bool IsPair(Card[] hand)
 		{
-			if (hand[0].Rank >= Ranks.QUEEN)
-			{
+			if (hand[0].Rank == hand[1].Rank || hand[0].Rank == hand[2].Rank)
 				return true;
-			}
+			if (hand[1].Rank == hand[2].Rank)
+				return true;
 			return false;
 		}
 
