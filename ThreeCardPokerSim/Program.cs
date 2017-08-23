@@ -6,7 +6,7 @@ namespace TheSim
 	public class Program
 	{
 		public const int MAXPLAYER = 7;
-		public const int CURRENTPLAYER = 3;
+		public const int CURRENTPLAYER = 6;
 
 		static Player aDealer;
 		static Player[] aPlayers;
@@ -20,19 +20,30 @@ namespace TheSim
 				DealCards();
 				CheckAgainstDealer();
 				printDealerAndPlayersHands();
-				GameRule.isPlay(aDealer);
+				//GameRule.isPlay(aDealer);
 				Console.ReadLine();
 				Console.Clear();
 			}
 			return 0;
 		}
 
-		public static void CheckAgainstDealer()
+		public static void CheckAgainstDealerAnd()
 		{
-			//if (_dealerPlay())
-			//{
-
-			//}
+			var aDealerPlayType = GameMechanics.PlayType(aDealer, true);
+			if (aDealerPlayType != 0) //dealer play
+			{
+				for(int i = 0; i < aPlayers.Length; i++)
+				{
+					var aPlayerPlayType = GameMechanics.PlayType(aPlayers[i], false);
+					if (aPlayerPlayType != 0) //player play too
+					{
+						if (aPlayerPlayType <= aDealerPlayType)
+						{
+							//continue here, how to determine if beat dealer
+						}
+					}
+				}
+			}
 		}
 
 		public static void initializeGame()
@@ -43,6 +54,9 @@ namespace TheSim
 			{
 				aPlayers[i] = new Player();
 				aPlayers[i].TotalMoney = 1000000;
+				aPlayers[i].AnteBet = 3000;
+				aPlayers[i].PairBonusBet = 1000;
+				aPlayers[i].SixCardBonusBet = 1000;
 			}
 			aDeck = new Deck();
 		}
@@ -67,17 +81,19 @@ namespace TheSim
 			Console.WriteLine("Dealer's Hand:");
 			foreach (Card card in aDealer.Hand)
 			{
-				Console.WriteLine(card.Rank + " " + card.Suit);
+				Console.Write(card.Rank + " " + card.Suit + ", ");
 			}
+			Console.WriteLine("Play with: " + GameMechanics.PlayType(aDealer, true));
 			Console.WriteLine();
 
 			for (int i = 0; i < aPlayers.Length; i++)
 			{
-				Console.WriteLine("Player" + (i + 1) + "'s " + "Hand:");
+				Console.WriteLine("Player" + (i + 1) + "'s " + "total money: " + aPlayers[i].TotalMoney);
 				foreach (Card card in aPlayers[i].Hand)
 				{
-					Console.WriteLine(card.Rank + " " + card.Suit);
+					Console.Write(card.Rank + " " + card.Suit + ", ");
 				}
+				Console.WriteLine("Play with: " + GameMechanics.PlayType(aPlayers[i], false));
 				Console.WriteLine();
 			}
 		}
