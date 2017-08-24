@@ -36,6 +36,42 @@ namespace ThreeCardPokerSim.Entities
 			return 0;
 		}
 
+		public static bool IsBeatDealer(Player aDealer, Player aPlayer)
+		{
+			var aDealerPlayType = PlayType(aDealer, true);
+			var aPlayerPlayType = PlayType(aPlayer, false);
+
+			if (aPlayerPlayType > aDealerPlayType) return true;
+
+			aPlayer.Hand = aPlayer.Hand.OrderByDescending(item => item.Rank).ToArray();
+			aDealer.Hand = aDealer.Hand.OrderByDescending(item => item.Rank).ToArray();
+			// if both dealer and player play
+			if (aDealerPlayType != 0 && aPlayerPlayType != 0)
+			{
+				// check if their playtype are the same, if so, check which hand has bigger card
+				if (aPlayerPlayType == aDealerPlayType)
+				{
+					switch (aPlayerPlayType)
+					{
+						case PlayTypes.HIGH_CARD:
+						case PlayTypes.THREE_OF_A_KIND:
+						case PlayTypes.STRAIGHT:
+						case PlayTypes.STRAIGHT_FLUSH:
+						case PlayTypes.FLUSH:
+							return aPlayer.Hand[0].Rank > aDealer.Hand[0].Rank;
+						case PlayTypes.ONE_PAIR:
+							var dealerPairRank = (aDealer.Hand[0].Rank == aDealer.Hand[1].Rank) ? aDealer.Hand[0].Rank : aPlayer.Hand[2].Rank;
+							var playerPairRank = (aPlayer.Hand[0].Rank == aPlayer.Hand[1].Rank) ? aPlayer.Hand[0].Rank : aPlayer.Hand[2].Rank;
+							return playerPairRank > dealerPairRank;
+						default:
+							return false;
+					}
+				}
+			}
+
+			return false;
+		}
+
 		public static bool IsHighCard(Card[] hand, bool isDealer)
 		{
 			hand = hand.OrderByDescending(item => item.Rank).ToArray();

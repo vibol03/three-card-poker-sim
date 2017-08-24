@@ -15,34 +15,22 @@ namespace TheSim
 		{
 			initializeGame();
 
-			while(true)
+			while (true)
 			{
 				DealCards();
 				CheckAgainstDealer();
 				printDealerAndPlayersHands();
-				//GameRule.isPlay(aDealer);
 				Console.ReadLine();
 				Console.Clear();
 			}
 			return 0;
 		}
 
-		public static void CheckAgainstDealerAnd()
+		public static void CheckAgainstDealer()
 		{
-			var aDealerPlayType = GameMechanics.PlayType(aDealer, true);
-			if (aDealerPlayType != 0) //dealer play
+			for (int i = 0; i < aPlayers.Length; i++)
 			{
-				for(int i = 0; i < aPlayers.Length; i++)
-				{
-					var aPlayerPlayType = GameMechanics.PlayType(aPlayers[i], false);
-					if (aPlayerPlayType != 0) //player play too
-					{
-						if (aPlayerPlayType <= aDealerPlayType)
-						{
-							//continue here, how to determine if beat dealer
-						}
-					}
-				}
+				aPlayers[i].beatDealer = GameMechanics.IsBeatDealer(aDealer, aPlayers[i]);
 			}
 		}
 
@@ -94,7 +82,9 @@ namespace TheSim
 					Console.Write(card.Rank + " " + card.Suit + ", ");
 				}
 				Console.WriteLine("Play with: " + GameMechanics.PlayType(aPlayers[i], false));
+				Console.WriteLine("Beat dealer: " + aPlayers[i].beatDealer);
 				Console.WriteLine();
+
 			}
 		}
 
