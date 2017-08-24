@@ -14,6 +14,7 @@ namespace TheSim
 		public static int Main(string[] agrs)
 		{
 			initializeGame();
+			Console.SetWindowSize(100, 40);
 
 			while (true)
 			{
