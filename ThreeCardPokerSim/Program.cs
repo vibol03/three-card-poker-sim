@@ -14,6 +14,7 @@ namespace TheSim
 		public static int Main(string[] agrs)
 		{
 			initializeGame();
+			Console.SetWindowSize(100, 40);
 
 			while (true)
 			{
@@ -52,7 +53,7 @@ namespace TheSim
 		public static void DealCards()
 		{
 			aDeck = new Deck();
-			int deckDealingIndex = 0;
+			int deckDealingIndex = 0; 
 
 			for (int i = 0; i < 3; i++)
 			{
