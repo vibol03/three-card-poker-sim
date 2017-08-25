@@ -53,7 +53,7 @@ namespace TheSim
 		public static void DealCards()
 		{
 			aDeck = new Deck();
-			int deckDealingIndex = 0;
+			int deckDealingIndex = 0; 
 
 			for (int i = 0; i < 3; i++)
 			{
