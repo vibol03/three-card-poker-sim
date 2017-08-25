@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace ThreeCardPokerSim.Entities
 {
@@ -36,6 +37,82 @@ namespace ThreeCardPokerSim.Entities
 			return 0;
 		}
 
+		public static long CalculateAnteBetPayout(Player aDealer, Player aPlayer, PlayTypes aDealerPlayType, PlayTypes aPlayerPlayType)
+		{
+			var payoutAmount = 0L;
+			
+			if (aDealerPlayType > 0 && aPlayerPlayType > 0) // if both the dealer and the player play
+			{
+				if (aPlayer.beatDealer)
+				{
+					payoutAmount = aPlayer.AnteBet + aPlayer.AnteMatchBet;
+					payoutAmount += CalculateAnteBonus(aPlayer, aPlayerPlayType);
+				}
+				else
+				{
+					payoutAmount = -(aPlayer.AnteBet + aPlayer.AnteMatchBet);
+				}
+			}
+			else if (aDealerPlayType == 0 && aPlayerPlayType > 0)
+			{
+				payoutAmount += aPlayer.AnteBet;
+				payoutAmount += CalculateAnteBonus(aPlayer, aPlayerPlayType);
+			}
+			else if (aPlayerPlayType == 0)
+			{
+				payoutAmount -= aPlayer.AnteBet;
+			}
+
+			return payoutAmount;
+		}
+
+		private static long CalculateAnteBonus(Player aPlayer, PlayTypes aPlayType)
+		{
+			switch (aPlayType) // determine additional ante bonus
+			{
+				case PlayTypes.STRAIGHT:
+					return aPlayer.AnteBet * (long)AntePayouts.STRAIGHT;
+				case PlayTypes.THREE_OF_A_KIND:
+					return aPlayer.AnteBet * (long)AntePayouts.THREE_OF_A_KIND;
+				case PlayTypes.STRAIGHT_FLUSH:
+					return aPlayer.AnteBet * (long)AntePayouts.STRAIGHT_FLUSH;
+				default:
+					return 0;
+			}
+		}
+
+		public static long CalculatePairPlusBetPayout(Player aPlayer, PlayTypes aPlayerPlayType)
+		{
+			switch (aPlayerPlayType) // determine additional ante bonus
+			{
+				case PlayTypes.ONE_PAIR:
+					return aPlayer.PairPlusBet * (long)PairPlusPayouts.ONE_PAIR;
+				case PlayTypes.FLUSH:
+					return aPlayer.PairPlusBet * (long)PairPlusPayouts.FLUSH;
+				case PlayTypes.STRAIGHT:
+					return aPlayer.PairPlusBet * (long)PairPlusPayouts.STRAIGHT;
+				case PlayTypes.THREE_OF_A_KIND:
+					return aPlayer.PairPlusBet * (long)PairPlusPayouts.THREE_OF_A_KIND;
+				case PlayTypes.STRAIGHT_FLUSH:
+					return aPlayer.PairPlusBet * (long)PairPlusPayouts.STRAIGHT_FLUSH;
+				default:
+					return -aPlayer.PairPlusBet;
+			}
+		}
+
+		public static long CalculateSixCardBonusBetPayout(Player aDealer, Player aPlayer)
+		{
+			//merge and sort the player and dealer's cards
+			var aSixCardHand = new Card[6];
+			aDealer.Hand.CopyTo(aSixCardHand, 0);
+			aPlayer.Hand.CopyTo(aSixCardHand, 3);
+			aSixCardHand = aSixCardHand.OrderByDescending(item => item.Rank).ToArray();
+
+
+		}
+
+		private static
+
 		public static bool IsBeatDealer(Player aDealer, Player aPlayer)
 		{
 			var aDealerPlayType = PlayType(aDealer, true);
@@ -58,7 +135,14 @@ namespace ThreeCardPokerSim.Entities
 						case PlayTypes.STRAIGHT:
 						case PlayTypes.STRAIGHT_FLUSH:
 						case PlayTypes.FLUSH:
-							return aPlayer.Hand[0].Rank > aDealer.Hand[0].Rank;
+							if (aPlayer.Hand[0].Rank > aDealer.Hand[0].Rank)
+								return true;
+							else if (aPlayer.Hand[0].Rank == aDealer.Hand[0].Rank && aPlayer.Hand[1].Rank > aDealer.Hand[1].Rank)
+								return true;
+							else if (aPlayer.Hand[1].Rank == aDealer.Hand[1].Rank && aPlayer.Hand[2].Rank > aDealer.Hand[2].Rank)
+								return true;
+							else
+								return false;
 						case PlayTypes.ONE_PAIR:
 							var dealerPairRank = (aDealer.Hand[0].Rank == aDealer.Hand[1].Rank) ? aDealer.Hand[0].Rank : aPlayer.Hand[2].Rank;
 							var playerPairRank = (aPlayer.Hand[0].Rank == aPlayer.Hand[1].Rank) ? aPlayer.Hand[0].Rank : aPlayer.Hand[2].Rank;
