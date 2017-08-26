@@ -62,7 +62,7 @@ namespace TheSim
 				aPlayers[i] = new Player();
 				aPlayers[i].TotalMoney = 1000000;
 				aPlayers[i].AnteBet = 3000;
-				aPlayers[i].PairPlusBet = 3000;
+				aPlayers[i].PairPlusBet = 1000;
 				aPlayers[i].SixCardBonusBet = 1000;
 			}
 			aDeck = new Deck();

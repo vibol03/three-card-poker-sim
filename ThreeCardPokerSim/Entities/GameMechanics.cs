@@ -102,6 +102,13 @@ namespace ThreeCardPokerSim.Entities
 
 		public static long CalculateSixCardBonusBetPayout(Player aDealer, Player aPlayer)
 		{
+			
+
+			return 0;
+		}
+
+		public static SixCardBonusPayouts SixCardBonusType(Player aDealer, Player aPlayer)
+		{
 			//merge and sort the player and dealer's cards
 			var aSixCardHand = new Card[6];
 			aDealer.Hand.CopyTo(aSixCardHand, 0);
@@ -109,9 +116,41 @@ namespace ThreeCardPokerSim.Entities
 			aSixCardHand = aSixCardHand.OrderByDescending(item => item.Rank).ToArray();
 
 
+			foreach (Card card in aSixCardHand)
+			{
+				
+			}
 		}
 
-		private static
+		public static bool IsThreeOfAKindInSixCardHand(Player aDealer, Player aPlayer, Card[] aSixCardHand)
+		{
+			if (PlayType(aDealer, true) == PlayTypes.THREE_OF_A_KIND || PlayType(aPlayer, false) == PlayTypes.THREE_OF_A_KIND)
+			{
+				return false;
+			}
+
+			foreach(Suits suit in Enum.GetValues(typeof(Suits)))
+			{
+				var suitCount = 0;
+				foreach(Card card in aSixCardHand)
+				{
+					suitCount += (card.Suit == suit) ? 1 : 0;
+				}
+				if (suitCount == 3) return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsStraightInSixCardHand(Card[] aSixCardHand)
+		{
+			aSixCardHand = aSixCardHand.GroupBy(x => x.Rank).Select(x => x.First()).ToArray();
+
+			//continue here, figure out how to determine if a sixcardhand is straight;
+			return false;
+		}
+
+		//private static
 
 		public static bool IsBeatDealer(Player aDealer, Player aPlayer)
 		{
@@ -155,6 +194,8 @@ namespace ThreeCardPokerSim.Entities
 
 			return false;
 		}
+
+		public
 
 		public static bool IsHighCard(Card[] hand, bool isDealer)
 		{
