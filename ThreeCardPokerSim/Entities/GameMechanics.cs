@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ThreeCardPokerSim.Entities
@@ -100,11 +101,27 @@ namespace ThreeCardPokerSim.Entities
 			}
 		}
 
-		public static long CalculateSixCardBonusBetPayout(Player aDealer, Player aPlayer)
+		public static long CalculateSixCardBonusBetPayout(Player aPlayer, SixCardBonusPayouts SixCardBonusType)
 		{
-			
-
-			return 0;
+			switch (SixCardBonusType) // determine additional ante bonus
+			{
+				case SixCardBonusPayouts.THREE_OF_A_KIND:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.THREE_OF_A_KIND;
+				case SixCardBonusPayouts.STRAIGHT:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.STRAIGHT;
+				case SixCardBonusPayouts.FLUSH:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.FLUSH;
+				case SixCardBonusPayouts.FULL_HOUSE:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.FULL_HOUSE;
+				case SixCardBonusPayouts.FOUR_OF_A_KIND:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.FOUR_OF_A_KIND;
+				case SixCardBonusPayouts.STRAIGHT_FLUSH:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.STRAIGHT_FLUSH;
+				case SixCardBonusPayouts.ROYAL_FLUSH:
+					return aPlayer.SixCardBonusBet * (long)SixCardBonusPayouts.ROYAL_FLUSH;
+				default:
+					return -aPlayer.SixCardBonusBet;
+			}
 		}
 
 		public static SixCardBonusPayouts SixCardBonusType(Player aDealer, Player aPlayer)
@@ -115,11 +132,15 @@ namespace ThreeCardPokerSim.Entities
 			aPlayer.Hand.CopyTo(aSixCardHand, 3);
 			aSixCardHand = aSixCardHand.OrderByDescending(item => item.Rank).ToArray();
 
+			if (IsRoyalFlushInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.ROYAL_FLUSH;
+			if (IsStraightFlushInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.STRAIGHT_FLUSH;
+			if (IsFourOfAKindInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.FOUR_OF_A_KIND;
+			if (IsFullHouseInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.FULL_HOUSE;
+			if (IsFlushInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.FLUSH;
+			if (IsStraightInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.STRAIGHT;
+			if (IsThreeOfAKindInSixCardHand(aDealer, aDealer, aSixCardHand)) return SixCardBonusPayouts.THREE_OF_A_KIND;
 
-			foreach (Card card in aSixCardHand)
-			{
-				
-			}
+			return 0;
 		}
 
 		public static bool IsThreeOfAKindInSixCardHand(Player aDealer, Player aPlayer, Card[] aSixCardHand)
@@ -129,14 +150,14 @@ namespace ThreeCardPokerSim.Entities
 				return false;
 			}
 
-			foreach(Suits suit in Enum.GetValues(typeof(Suits)))
+			foreach(Ranks rank in Enum.GetValues(typeof(Ranks)))
 			{
-				var suitCount = 0;
+				var rankCount = 0;
 				foreach(Card card in aSixCardHand)
 				{
-					suitCount += (card.Suit == suit) ? 1 : 0;
+					rankCount += (card.Rank == rank) ? 1 : 0;
 				}
-				if (suitCount == 3) return true;
+				if (rankCount == 3) return true;
 			}
 
 			return false;
@@ -144,13 +165,100 @@ namespace ThreeCardPokerSim.Entities
 
 		public static bool IsStraightInSixCardHand(Card[] aSixCardHand)
 		{
+			//getting rids of pairs.
 			aSixCardHand = aSixCardHand.GroupBy(x => x.Rank).Select(x => x.First()).ToArray();
+			if (aSixCardHand.Length < 5) return false; //if there are two pairs or three of a kind, we can be sure that there's no straight
 
-			//continue here, figure out how to determine if a sixcardhand is straight;
+			if (aSixCardHand[0].Rank == Ranks.ACE) //check for special case with the straight beginning with ace
+			{
+				if (aSixCardHand.Length == 6)
+				{
+					for (int i = 2; i < aSixCardHand.Length; i++)
+					{
+						if (i < aSixCardHand.Length - 1 && aSixCardHand[i].Rank - aSixCardHand[i + 1].Rank != 1)
+							return false;
+					}
+				}
+			}
+
+			for (int i = 1; i < aSixCardHand.Length - 1; i++)
+			{
+				if (i < aSixCardHand.Length - 2 && aSixCardHand[i].Rank - aSixCardHand[i + 1].Rank != 1)
+					return false;
+			} // if we're past this loop, that means the middle cards form a straight, now just need to check the head and the tail
+
+			return	((aSixCardHand[0].Rank - aSixCardHand[1].Rank == 1) ||
+					(aSixCardHand[aSixCardHand.Length - 2].Rank - aSixCardHand[aSixCardHand.Length - 1].Rank == 1)
+					|| (aSixCardHand[0].Rank == Ranks.ACE && aSixCardHand[aSixCardHand.Length - 1].Rank == Ranks.TWO));
+		}
+
+		public static bool IsFlushInSixCardHand(Card[] aSixCardHand)
+		{
+			foreach (Suits suit in Enum.GetValues(typeof(Suits)))
+			{
+				var suitCount = 0;
+				foreach (Card card in aSixCardHand)
+				{
+					suitCount += (card.Suit == suit) ? 1 : 0;
+					if (suitCount == 5) return true;
+				}
+			}
+
 			return false;
 		}
 
-		//private static
+		public static bool IsFullHouseInSixCardHand(Card[] aSixCardHand)
+		{
+			var aDeDupedHand = aSixCardHand.GroupBy(x => x.Rank).Select(x => x.First()).ToArray();
+			var hasThreeOfAKind = false;
+			var hasAPair = false;
+
+			foreach(Card card in aDeDupedHand)
+			{
+				hasThreeOfAKind = aSixCardHand.Count(item => item.Rank == card.Rank) == 3;
+				hasAPair = aSixCardHand.Count(item => item.Rank == card.Rank) == 2;
+				if (hasThreeOfAKind && hasAPair) return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsFourOfAKindInSixCardHand(Card[] aSixCardHand)
+		{
+			foreach (Ranks rank in Enum.GetValues(typeof(Ranks)))
+			{
+				var rankCount = 0;
+				foreach (Card card in aSixCardHand)
+				{
+					rankCount += (card.Rank == rank) ? 1 : 0;
+				}
+				if (rankCount == 4) return true;
+			}
+
+			return false;
+		}
+
+		public static bool IsStraightFlushInSixCardHand(Card[] aSixCardHand)
+		{
+			//getting rids of pairs.
+			var anArrayOfTwoHands = new List<Card[]>();
+			anArrayOfTwoHands.Add(aSixCardHand.GroupBy(x => x.Rank).Select(x => x.First()).ToArray());
+			anArrayOfTwoHands.Add(aSixCardHand.GroupBy(x => x.Rank).Select(x => x.Last()).ToArray());
+
+			if (anArrayOfTwoHands[0].Length < 5) return false; //if there are two pairs or three of a kind, we can be sure that there's no straight
+
+			foreach(Card[] hand in anArrayOfTwoHands)
+			{
+				if (_straightFlushSubFunctionCheck(hand)) return true;
+			}
+			return false;
+		}
+
+		public static bool IsRoyalFlushInSixCardHand(Card[] aSixCardHand)
+		{
+			var iis = IsStraightFlushInSixCardHand(aSixCardHand);
+			return aSixCardHand[0].Rank == Ranks.ACE && (aSixCardHand[4].Rank == Ranks.TEN || aSixCardHand[5].Rank == Ranks.TEN) && iis;
+		}
 
 		public static bool IsBeatDealer(Player aDealer, Player aPlayer)
 		{
@@ -195,8 +303,6 @@ namespace ThreeCardPokerSim.Entities
 			return false;
 		}
 
-		public
-
 		public static bool IsHighCard(Card[] hand, bool isDealer)
 		{
 			hand = hand.OrderByDescending(item => item.Rank).ToArray();
@@ -239,5 +345,40 @@ namespace ThreeCardPokerSim.Entities
 		{
 			return (hand[0].Rank == Ranks.ACE && hand[1].Rank == Ranks.KING && hand[2].Rank == Ranks.QUEEN) && IsFlush(hand);
 		}
+
+
+		private static bool _straightFlushSubFunctionCheck(Card[] aSixCardHand)
+		{
+			if (aSixCardHand[0].Rank == Ranks.ACE) //check for special case with the straight beginning with ace
+			{
+				if (aSixCardHand.Length == 6)
+				{
+					for (int i = 2; i < aSixCardHand.Length; i++)
+					{
+						// the first condition is to make sure we dont go out of array index
+						if (i < aSixCardHand.Length - 1 &&
+							(aSixCardHand[i].Rank - aSixCardHand[i + 1].Rank != 1 || aSixCardHand[i].Suit != aSixCardHand[i + 1].Suit))
+							return false;
+					}
+				}
+			}
+
+			if (aSixCardHand.Length == 5)
+			{
+				for (int i = 1; i < aSixCardHand.Length - 1; i++)
+				{
+					// the first condition is to make sure we dont go out of array index
+					if (i < aSixCardHand.Length - 2 &&
+						(aSixCardHand[i].Rank - aSixCardHand[i + 1].Rank != 1 || aSixCardHand[i].Suit != aSixCardHand[i + 1].Suit))
+						return false;
+				} // if we're past this loop, that means the middle cards form a straight, now just need to check the head and the tail
+
+				return ((aSixCardHand[0].Rank - aSixCardHand[1].Rank == 1 && aSixCardHand[0].Suit == aSixCardHand[1].Suit) ||
+						(aSixCardHand[aSixCardHand.Length - 2].Rank - aSixCardHand[aSixCardHand.Length - 1].Rank == 1 && aSixCardHand[aSixCardHand.Length - 2].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit)
+						|| (aSixCardHand[0].Rank == Ranks.ACE && aSixCardHand[aSixCardHand.Length - 1].Rank == Ranks.TWO && aSixCardHand[0].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit));
+			}
+			return false;
+		}
+
 	}
 }
