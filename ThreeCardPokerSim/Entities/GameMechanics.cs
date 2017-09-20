@@ -373,9 +373,11 @@ namespace ThreeCardPokerSim.Entities
 						return false;
 				} // if we're past this loop, that means the middle cards form a straight, now just need to check the head and the tail
 
-				return ((aSixCardHand[0].Rank - aSixCardHand[1].Rank == 1 && aSixCardHand[0].Suit == aSixCardHand[1].Suit) ||
-						(aSixCardHand[aSixCardHand.Length - 2].Rank - aSixCardHand[aSixCardHand.Length - 1].Rank == 1 && aSixCardHand[aSixCardHand.Length - 2].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit)
-						|| (aSixCardHand[0].Rank == Ranks.ACE && aSixCardHand[aSixCardHand.Length - 1].Rank == Ranks.TWO && aSixCardHand[0].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit));
+                var headMatch = (aSixCardHand[0].Rank - aSixCardHand[1].Rank == 1 && aSixCardHand[0].Suit == aSixCardHand[1].Suit); //match both rank and suit on the first and second cards;
+                var tailMatch = (aSixCardHand[aSixCardHand.Length - 2].Rank - aSixCardHand[aSixCardHand.Length - 1].Rank == 1 && aSixCardHand[aSixCardHand.Length - 2].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit); //match both rank and suit on the last and second to last cards;
+                var headTailMatchWhenAceSmall = (aSixCardHand[0].Rank == Ranks.ACE && aSixCardHand[aSixCardHand.Length - 1].Rank == Ranks.TWO && aSixCardHand[0].Suit == aSixCardHand[aSixCardHand.Length - 1].Suit);
+
+                return (headMatch && tailMatch) || headTailMatchWhenAceSmall;
 			}
 			return false;
 		}

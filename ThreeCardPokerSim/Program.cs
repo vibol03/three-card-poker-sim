@@ -13,8 +13,8 @@ namespace TheSim
 		static Deck aDeck;
 		public static int Main(string[] agrs)
 		{
-			//testProcedure();
-			initializeGame();
+            testProcedure();
+            initializeGame();
 			Console.SetWindowSize(100, 49);
 
 			while (true)
@@ -142,13 +142,13 @@ namespace TheSim
 			aTestPlayer.Hand[2] = new Card()
 			{
 				Rank = Ranks.TEN,
-				Suit = Suits.CLUB
-			};
+				Suit = Suits.HEART
+            };
 			aTestPlayer.Hand[0] = new Card()
 			{
-				Rank = Ranks.TEN,
-				Suit = Suits.SPADE
-			};
+				Rank = Ranks.NINE,
+				Suit = Suits.HEART
+            };
 
 			Console.WriteLine(GameMechanics.SixCardBonusType(aTestDealer, aTestPlayer));
 			Console.ReadLine();
