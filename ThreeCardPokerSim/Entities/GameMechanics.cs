@@ -131,7 +131,7 @@ namespace ThreeCardPokerSim.Entities
 			aDealer.Hand.CopyTo(aSixCardHand, 0);
 			aPlayer.Hand.CopyTo(aSixCardHand, 3);
 			aSixCardHand = aSixCardHand.OrderByDescending(item => item.Rank).ToArray();
-
+            //royal flush not working
 			if (IsRoyalFlushInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.ROYAL_FLUSH;
 			if (IsStraightFlushInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.STRAIGHT_FLUSH;
 			if (IsFourOfAKindInSixCardHand(aSixCardHand)) return SixCardBonusPayouts.FOUR_OF_A_KIND;
